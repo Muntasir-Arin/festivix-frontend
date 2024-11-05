@@ -8,7 +8,7 @@ export default function RequestResetPage() {
       <div className="max-w-md w-full space-y-8 bg-white p-6 rounded-xl shadow-2xl">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">Reset your password</h2>
-          <p className="mt-2 text-sm text-gray-600">Enter your email address and we'll send you a link to reset your password.</p>
+          <p className="mt-2 text-sm text-gray-600">Enter your email address and we&apos;ll send you a link to reset your password.</p>
         </div>
         <form className="mt-8 space-y-6" action="#" method="POST">
           <div className="rounded-md shadow-sm -space-y-px">
