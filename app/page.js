@@ -12,10 +12,8 @@ export default function Component() {
             El Camino
           </Link>
           <div className="hidden md:flex space-x-6 text-white">
-            <Link href="/shows" className="hover:text-pink-500 transition">SHOWS & TICKETS</Link>
-            <Link href="/calendar" className="hover:text-pink-500 transition">CALENDAR</Link>
-            <Link href="/about" className="hover:text-pink-500 transition">ABOUT</Link>
-            <Link href="/support" className="hover:text-pink-500 transition">SUPPORT</Link>
+            <Link href="/login" className="hover:text-pink-500 transition">LOGIN</Link>
+            <Link href="/register" className="hover:text-pink-500 transition">SIGN-UP</Link>
           </div>
           <button className="md:hidden text-white">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
