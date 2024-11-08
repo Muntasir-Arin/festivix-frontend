@@ -2,14 +2,16 @@
 import { useState } from 'react'
 import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation' 
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const router = useRouter()
   
   // State for form fields
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -36,7 +38,7 @@ export default function RegisterPage() {
 
     // API request to register the user (replace with your backend API URL)
     try {
-      const response = await fetch('https://el-camino-backend.vercel.app/api/auth/register', {
+      const response = await fetch('http://localhost:8000/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,10 +48,8 @@ export default function RegisterPage() {
       const data = await response.json()
 
       if (response.ok) {
-        // Redirect or show success message
-        console.log('Account created successfully:', data)
+        router.push('/login')
       } else {
-        // Handle error response
         setError(data.message || 'Registration failed')
       }
     } catch (err) {
@@ -73,14 +73,14 @@ export default function RegisterPage() {
                   <User className="h-5 w-5 text-gray-400" aria-hidden="true" />
                 </div>
                 <input
-                  id="name"
-                  name="name"
+                  id="username"
+                  name="username"
                   type="text"
-                  autoComplete="name"
+                  autoComplete="username"
                   required
                   className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                   placeholder="Full Name"
-                  value={formData.name}
+                  value={formData.username}
                   onChange={handleChange}
                 />
               </div>
