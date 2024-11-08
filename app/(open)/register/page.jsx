@@ -38,13 +38,13 @@ export default function RegisterPage() {
 
     // API request to register the user (replace with your backend API URL)
     try {
-      const response = await fetch('http://localhost:8000/api/auth/register', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
-      })
+      });
       const data = await response.json()
 
       if (response.ok) {
