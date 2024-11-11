@@ -63,7 +63,7 @@ const Header: React.FC<HeaderProps> = ({
                             fillWidth gap="4" paddingX="l"
                             alignItems="center">
                             <ToggleButton
-                                selected={pathname === '/dashboard'}
+                                selected={true}
                                 href=""
                                 label="Dashboard"/>
                             <ToggleButton
@@ -138,7 +138,7 @@ const Header: React.FC<HeaderProps> = ({
                             fillWidth gap="4" paddingX="l"
                             alignItems="center">
                             <ToggleButton
-                                selected={pathname === '/dashboard'}
+                                selected={true}
                                 href=""
                                 label="Dashboard"/>
                             <ToggleButton

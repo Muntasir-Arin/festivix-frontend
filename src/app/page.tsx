@@ -6,7 +6,6 @@ import { Heading, Text, Flex, Button, Grid, Icon, InlineCode, Logo, Background, 
 import Link from 'next/link';
 import { Header } from '@/once-ui/modules';
 
-
 export default function Home() {
 	
 	return (
