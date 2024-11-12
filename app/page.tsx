@@ -1,7 +1,5 @@
 import { FloatingNav } from "@/components/ui/floating-navbar";
-import Image from "next/image";
 import { FaCompass, FaHeart, FaHome, FaStore } from "react-icons/fa";
-import { FaMagnifyingGlass } from "react-icons/fa6";
 
 export default function Home() {
   return (
