@@ -67,3 +67,12 @@
     @apply bg-background text-foreground;
   }
 }
+.text-outline-landing {
+  color: transparent;
+  font-size: 27vw; /* Font size based on viewport width */
+  -webkit-text-stroke: 0.1vw black; /* Responsive stroke width */
+  position: relative;
+  user-select: none; /* Prevent text selection */
+  opacity: 30%;
+  pointer-events: none;
+}
