@@ -25,7 +25,7 @@ export async function middleware(request) {
       // Restrict access based on user role and request URL
       const url = request.nextUrl.pathname
 
-      if (url.startsWith('/secure') && userRole !== 'Admin') {
+      if (url.startsWith('/secure') && !userRole.includes('Admin')) {
         // Redirect non-admin users away from admin routes
         return NextResponse.redirect(new URL('/404', request.url))
       }
