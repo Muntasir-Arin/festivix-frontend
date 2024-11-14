@@ -15,7 +15,7 @@ export default function Home() {
           { name: "Favorites", link: "/favorites", icon: <FaHeart /> },
         ]}
       />
-      <div className="relative xl:h-screen lg:h-[80vh] md:h-[70vh] sm:h-[65vh] h-[55vh] overflow-hidden dark:bg-dot-white/[0.2] bg-dot-black/[0.2] ">
+      <div className="relative xl:h-screen lg:h-[80vh] md:h-[70vh] sm:h-[65vh] h-[55vh] overflow-hidden  bg-dot-black/[0.1] ">
         {/* Background Text */}
         <h1 className=" opacity-5 absolute top-[70%] sm:top-1/2 left-[50%] transform -translate-x-1/2 sm:-translate-y-1/2 m-auto font-bold text-outline-landing -z-20">
           FESTIVIX
@@ -79,7 +79,7 @@ export default function Home() {
           
         </div>
       </div>
-      <div className="h-[2000px] w-full dark:bg-dot-white/[0.2] bg-dot-black/[0.2] relative flex items-center justify-center">
+      <div className="h-[2000px] w-full bg-dot-black/[0.1] relative flex items-center justify-center">
         <HomePageCards/>
       </div>
     </div>)
