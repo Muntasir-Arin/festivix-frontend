@@ -5,7 +5,12 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true, // Disables ESLint checks during production builds
   },
   images: {
-    remotePatterns: [
+    remotePatterns: [  //
+      {
+        protocol: 'https',
+        hostname: 'www.gravatar.com',
+        pathname: '/**',
+      },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
@@ -14,6 +19,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'assets.aceternity.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.imgur.com',
         pathname: '/**',
       },
     ],

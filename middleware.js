@@ -45,5 +45,5 @@ export async function middleware(request) {
 
 // Matcher to specify protected routes
 export const config = {
-    matcher: ['/dashboard/:path*', '/secure/:path*'],
+    matcher: ['/secure/:path*'],
   }

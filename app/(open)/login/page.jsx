@@ -19,11 +19,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [formErrors, setFormErrors] = useState({ email: "", password: "" });
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const result = loginSchema.safeParse({ email, password });
     if (!result.success) {
@@ -32,6 +35,7 @@ export default function LoginPage() {
         email: errors.email?._errors[0] || "",
         password: errors.password?._errors[0] || "",
       });
+      setIsLoading(false);
       return;
     }
     setFormErrors({ email: "", password: "" });
@@ -54,10 +58,14 @@ export default function LoginPage() {
       const data = await response.json();
       const token = data.token;
       localStorage.setItem("authToken", token);
-      router.push("/dashboard");
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 500);
     } catch (error) {
       setErrorMessage("Something went wrong. Please try again.");
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -103,7 +111,7 @@ export default function LoginPage() {
             className="bg-gradient-to-br relative group/btn from-black dark:from-zinc-900 dark:to-zinc-900 to-neutral-600 block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
             type="submit"
           >
-            Login &rarr;
+            {isLoading ? "Logging in..." : "Login"} &rarr;
             <BottomGradient />
           </button>
 
