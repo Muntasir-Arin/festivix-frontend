@@ -73,10 +73,10 @@
 .text-outline-landing {
   color: transparent;
   font-size: 27vw; /* Font size based on viewport width */
-  -webkit-text-stroke: 0.15vw black; /* Responsive stroke width */
+  -webkit-text-stroke: 0.2vw rgb(63, 63, 63); /* Responsive stroke width */
 
   user-select: none; /* Prevent text selection */
-  opacity: 30%;
+  opacity: 50%;
   pointer-events: none;
 }
 .dark .text-outline-landing {
