@@ -2,12 +2,11 @@ import { FloatingNav } from "@/components/ui/floating-navbar";
 import { FaCompass, FaHeart, FaHome, FaStore } from "react-icons/fa";
 import Image from "next/image";
 import { ModeToggle } from "@/components/theme-mode";
-
+import {HomePageCards} from "@/components/homepage-card";
 export default function Home() {
   return (
-    <div>
-              <ModeToggle/>
-
+    (<div>
+      <ModeToggle/>
       <FloatingNav
         navItems={[
           { name: "Home", link: "/", icon: <FaHome /> },
@@ -16,7 +15,6 @@ export default function Home() {
           { name: "Favorites", link: "/favorites", icon: <FaHeart /> },
         ]}
       />
-
       <div className="relative xl:h-screen lg:h-[80vh] md:h-[70vh] sm:h-[65vh] h-[55vh] overflow-hidden dark:bg-dot-white/[0.2] bg-dot-black/[0.2] ">
         {/* Background Text */}
         <h1 className=" opacity-5 absolute top-1/2 left-[50%] transform -translate-x-1/2 -translate-y-1/2 m-auto font-bold text-outline-landing -z-20">
@@ -28,11 +26,13 @@ export default function Home() {
             <Image
               src="/eminem.jpg"
               alt="Background Image"
-              layout="fill"
-              objectFit="cover"
               quality={100}
               className="brightness-75"
-            />
+              fill
+              sizes="100vw"
+              style={{
+                objectFit: "cover"
+              }} />
           </div>
         </div>
 
@@ -42,11 +42,13 @@ export default function Home() {
             <Image
               src="/rosalia.jpeg"
               alt="Background Image"
-              layout="fill"
-              objectFit="cover"
-              quality={100}
+              quality={10}
               className="brightness-75"
-            />
+              fill
+              sizes="100vw"
+              style={{
+                objectFit: "cover"
+              }} />
           </div>
         </div>
 
@@ -56,11 +58,13 @@ export default function Home() {
             <Image
               src="/barca.jpg"
               alt="Background Image"
-              layout="fill"
-              objectFit="cover"
-              quality={100}
+              quality={50}
               className="brightness-75"
-            />
+              fill
+              sizes="100vw"
+              style={{
+                objectFit: "cover"
+              }} />
           </div>
         </div>
 
@@ -75,14 +79,9 @@ export default function Home() {
           
         </div>
       </div>
-
       <div className="h-[2000px] w-full dark:bg-dot-white/[0.2] bg-dot-black/[0.2] relative flex items-center justify-center">
-        {/* Radial gradient for the container to give a faded look */}
-        <div className="absolute pointer-events-none inset-0 flex items-center justify-center  [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
-        <p className="text-4xl sm:text-7xl font-bold relative z-20 bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-500 py-8">
-          Coming Soon!
-        </p>
+        <HomePageCards/>
       </div>
-    </div>
+    </div>)
   );
 }
