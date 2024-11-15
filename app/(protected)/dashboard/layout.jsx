@@ -6,7 +6,7 @@ import {
   IconArrowLeft,
   IconBrandTabler,
   IconSettings,
-  IconUserBolt,
+//   IconUserBolt,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -49,13 +49,13 @@ export default function LayoutPage({ children }) {
           }
         );
         setUserData(response.data);
-      } catch (err) {
+      } catch {
         router.push('/login');
       }
     };
 
     fetchUserData();
-  }, []); 
+  }, [router]); 
 
   const links = [
     {
@@ -166,22 +166,14 @@ export const LogoIcon = () => {
 };
 
 
-// UserDataProvider component to pass userData down the component tree
-function UserDataProvider({ userData, children }) {
-    return (
-      <UserDataContext.Provider value={userData}>
-        {children}
-      </UserDataContext.Provider>
-    )
-  }
-  
+
   // Create a context for user data
-  import { createContext, useContext } from 'react'
+import { createContext, useContext } from 'react'
   
-  const UserDataContext = createContext(null)
+const UserDataContext = createContext(null)
   
   // Custom hook to use user data in child components
-  export function useUserData() {
+export function useUserData() {
     const context = useContext(UserDataContext)
     if (context === undefined) {
       throw new Error('useUserData must be used within a UserDataProvider')

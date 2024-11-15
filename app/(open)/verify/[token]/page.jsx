@@ -23,13 +23,14 @@ const VerifyPage = ({ params }) => {
         if (!unwrappedParams) return; // Make sure the params are unwrapped
       try {
         // Extract token from the URL params
-        const { id, token } = unwrappedParams;
+        const { token } = unwrappedParams;
 
         // Make GET request to verify email using the token
         await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/verify/${token}`);
 
         router.push('/verify/success');
-      } catch (error) {
+      } catch {
+        
         // Handle error, for example, redirect to an error page
         router.push('/verify/error');
       } finally {

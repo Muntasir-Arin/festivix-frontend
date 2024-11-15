@@ -104,7 +104,6 @@ export default function RegisterPage() {
         return;
       }
 
-      const data = await response.json();
       router.push("/login");
     } catch (error) {
       setErrorMessage("Something went wrong. Please try again.");

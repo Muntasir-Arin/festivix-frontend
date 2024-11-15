@@ -7,7 +7,6 @@ import React, {
 import {
   IconArrowNarrowLeft,
   IconArrowNarrowRight,
-  IconX,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import {motion } from "framer-motion";
@@ -153,7 +152,6 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
 
 export const Card = ({
   card,
-  index,
   layout = false,
 }: {
   card: Card;
