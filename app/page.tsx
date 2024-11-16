@@ -18,7 +18,7 @@ export default function Home() {
       <div className="relative xl:h-screen lg:h-[80vh] md:h-[70vh] sm:h-[65vh] h-[55vh] overflow-hidden  bg-dot-black/[0.1] ">
         {/* Background Text */}
         <h1 className=" opacity-5 absolute top-[70%] sm:top-1/2 left-[50%] transform -translate-x-1/2 sm:-translate-y-1/2 m-auto font-bold text-outline-landing -z-20">
-          FESTIVIX
+        FESTiViX
         </h1>
 
         <div className="absolute left-[2%] md:left-[15%] lg:left-[20%] top-1/2 w-[43%] lg:w-[27%] md:w-[32%] -translate-y-1/2 rounded-full bg-background aspect-square">
@@ -74,7 +74,7 @@ export default function Home() {
             className="text-5xl md:text-6xl sm:text-7xl lg:text-8xl font-bold text-white tracking-wide opacity-95 "
             style={{ textShadow: "2px 2px 8px rgba(0, 0, 0, 0.7)" }}
           >
-            FESTiviX!
+            FESTiViX!
           </h2>
           
         </div>
