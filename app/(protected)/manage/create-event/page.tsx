@@ -80,7 +80,7 @@ const uploadImageAndGetUrl = async (file) => {
 
 
 
-export function EventForm() {
+export default function EventForm() {
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
@@ -156,6 +156,7 @@ export function EventForm() {
   };
 
   return (
+    <div className="container mx-auto py-10">
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Create New Event</CardTitle>
@@ -441,13 +442,6 @@ export function EventForm() {
         </Form>
       </CardContent>
     </Card>
-  );
-}
-
-export default function EventPage() {
-  return (
-    <div className="container mx-auto py-10">
-      <EventForm />
     </div>
   );
 }
