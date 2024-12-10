@@ -1,9 +1,10 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from 'react-hook-form';
 import * as z from "zod";
-import { Input } from "@/components/ui/input-cn";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -27,8 +28,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import MapInput from "@/components/map-input";
+import { MapPin } from 'lucide-react';
+import dynamic from 'next/dynamic';
 
+const MapInput = dynamic(() => import('@/components/map-input'), { ssr: false });
 
 const eventFormSchema = z.object({
   name: z.string().min(2, "Event name must be at least 2 characters").max(100, "Event name must be less than 100 characters"),
@@ -36,10 +39,9 @@ const eventFormSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description must be less than 1000 characters"),
   date: z.string().min(1, "Please select a date"),
   time: z.string().min(1, "Please select a time"),
-  latitude: z.string(),
-  longitude: z.string(),
+  latitude: z.string().regex(/^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}$/, "Invalid latitude"),
+  longitude: z.string().regex(/^-?((1[0-7][0-9])|([1-9]?[0-9]))\.{1}\d{1,6}$/, "Invalid longitude"),
   image: z.instanceof(File).optional(),
-  imageurl: z.string().optional(),
   ageRestriction: z.string(),
   dynamicPricing: z.boolean(),
   maxPricingPercent: z.number().min(0).max(100).optional(),
@@ -47,39 +49,9 @@ const eventFormSchema = z.object({
   ticketSaleEnd: z.string().min(1, "Please select an end date"),
   venueType: z.string().min(1, "Please select a venue type"),
   themeColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid color format"),
-  location:z.any()
 });
 
-const uploadImageAndGetUrl = async (file: File) => {
-  try {
-    // Prepare the data for the image upload API
-    const imageFormData = new FormData();
-    imageFormData.append('image', file);
-    imageFormData.append('type', 'image'); 
-    imageFormData.append('title', 'Simple upload');
-    imageFormData.append('description', 'This is a simple image upload in Imgur'); 
-
-
-    // Call the API (example: Imgur API)
-    const response = await axios.post('https://api.imgur.com/3/image', imageFormData, {
-      headers: {
-        Authorization: 'Client-ID 200b6acfd8c1b04',
-        'Content-Type': 'multipart/form-data',
-
-      },
-    });
-
-    // Extract and return the image URL from the API response
-    return response.data.data.link; // Adjust this based on the API response structure
-  } catch (error) {
-    console.error('Error uploading image:', error);
-    throw new Error('Image upload failed');
-  }
-};
-
-
-
-export default function EventForm() {
+function EventForm() {
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
@@ -92,13 +64,11 @@ export default function EventForm() {
       longitude: "",
       ageRestriction: "",
       dynamicPricing: false,
-      maxPricingPercent: 5,
+      maxPricingPercent: 10,
       ticketSaleStart: "",
       ticketSaleEnd: "",
       venueType: "",
       themeColor: "#000000",
-      location:'',
-      imageurl:''
     },
   });
   const router = useRouter();
@@ -106,48 +76,22 @@ export default function EventForm() {
   const onSubmit = async (data: z.infer<typeof eventFormSchema>) => {
     try {
       const formData = new FormData();
-
-      const processFormData = async (data: { name: string; category: string; description: string; date: string; time: string; latitude: string; longitude: string; ageRestriction: string; dynamicPricing: boolean; ticketSaleStart: string; ticketSaleEnd: string; venueType: string; themeColor: string; image?: File | undefined; imageurl?: string | undefined; maxPricingPercent?: number | undefined; location?: any; } | { [s: string]: unknown; } | ArrayLike<unknown>) => {
-        for (const [key, value] of Object.entries(data)) {
-          if (value instanceof File) {
-            try {
-              // Call the upload API and get the image URL
-              const imageUrl = await uploadImageAndGetUrl(value);
-      
-              // Append the image URL to the formData
-              formData.append('imageurl', imageUrl);
-            } catch (error) {
-              console.error('Skipping image URL append due to upload error:', error);
-            }
-          } else if (key === 'location' || key === 'imageurl') {
-            // Skip 'location' and 'imageurl' fields if no special handling is needed
-            continue;
-          } else {
-            // For other keys, convert the value to a string and append it
-            formData.append(key, String(value));
-          }
+      Object.entries(data).forEach(([key, value]) => {
+        if (value instanceof File) {
+          formData.append(key, value);
+        } else {
+          formData.append(key, String(value));
         }
-      
-        // Log formData content nicely
-        console.log('FormData content:');
-        formData.forEach((value, key) => {
-          console.log(`${key}:`, value);
-        });
-      };
+      });
 
-      processFormData(data);
+      const response = await axios.post('http://localhost:3000/api/events', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      
-      
-
-      // const response = await axios.post('http://localhost:3000/api/events', formData, {
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      // });
-
-      // toast.success("Event created successfully!");
-      // router.push('/events');
+      toast.success("Event created successfully!");
+      router.push('/events');
     } catch (error) {
       console.error('Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
@@ -155,7 +99,6 @@ export default function EventForm() {
   };
 
   return (
-    <div className="container mx-auto py-10">
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Create New Event</CardTitle>
@@ -245,31 +188,7 @@ export default function EventForm() {
               />
             </div>
 
-            
-
             <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Event Location</FormLabel>
-                  <FormControl>
-                    <MapInput
-                      onLocationSelect={(lat, lng) => {
-                        form.setValue('latitude', lat.toString());
-                        form.setValue('longitude', lng.toString());
-                      }}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Click on the map to set the event location
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-<FormField
               control={form.control}
               name="venueType"
               render={({ field }) => (
@@ -289,6 +208,28 @@ export default function EventForm() {
                       <SelectItem value="theater">Theater</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Event Location</FormLabel>
+                  <FormControl>
+                    <MapInput
+                      onLocationSelect={(lat, lng) => {
+                        form.setValue('latitude', lat.toString());
+                        form.setValue('longitude', lng.toString());
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Click on the map to set the event location
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -441,6 +382,13 @@ export default function EventForm() {
         </Form>
       </CardContent>
     </Card>
+  );
+}
+
+export default function EventPage() {
+  return (
+    <div className="container mx-auto py-10">
+      <EventForm />
     </div>
   );
 }
