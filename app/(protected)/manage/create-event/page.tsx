@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from 'react-hook-form';
 import * as z from "zod";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input-cn";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -28,7 +28,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { MapPin } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const MapInput = dynamic(() => import('@/components/map-input'), { ssr: false });
@@ -49,8 +48,17 @@ const eventFormSchema = z.object({
   ticketSaleEnd: z.string().min(1, "Please select an end date"),
   venueType: z.string().min(1, "Please select a venue type"),
   themeColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid color format"),
-});
+  imageurl: z.string().optional(),
+  location:z.any()
 
+});
+type EventFormValues = z.infer<typeof eventFormSchema>;
+
+const uploadImageAndGetUrl = async (file: File): Promise<string> => {
+  // Implement your image upload logic here
+  // For now, we'll return a placeholder URL
+  return "https://example.com/placeholder-image.jpg";
+};
 function EventForm() {
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
@@ -64,39 +72,62 @@ function EventForm() {
       longitude: "",
       ageRestriction: "",
       dynamicPricing: false,
-      maxPricingPercent: 10,
+      maxPricingPercent: 5,
       ticketSaleStart: "",
       ticketSaleEnd: "",
       venueType: "",
       themeColor: "#000000",
+      location:'',
+      imageurl:''
     },
   });
   const router = useRouter();
 
-  const onSubmit = async (data: z.infer<typeof eventFormSchema>) => {
+  const onSubmit = async (data: EventFormValues) => {
     try {
       const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
+      
+      for (const [key, value] of Object.entries(data)) {
         if (value instanceof File) {
-          formData.append(key, value);
-        } else {
-          formData.append(key, String(value));
+          try {
+            const imageUrl = await uploadImageAndGetUrl(value);
+            formData.append('imageurl', imageUrl);
+          } catch (error) {
+            console.error('Error uploading image:', error);
+            toast.error("Failed to upload image. Please try again.");
+            return;
+          }
+        } else if (key === 'location') {
+          if (value) {
+            formData.append('latitude', value.lat.toString());
+            formData.append('longitude', value.lng.toString());
+          }
+        } else if (value !== undefined && value !== null) {
+          formData.append(key, value.toString());
         }
+      }
+
+      // Log FormData content
+      console.log('FormData content:');
+      formData.forEach((value, key) => {
+        console.log(`${key}:`, value);
       });
 
-      const response = await axios.post('http://localhost:3000/api/events', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // Uncomment the following lines when ready to submit to the server
+      // const response = await axios.post('http://localhost:3000/api/events', formData, {
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // });
+      // toast.success("Event created successfully!");
+      // router.push('/events');
 
-      toast.success("Event created successfully!");
-      router.push('/events');
     } catch (error) {
       console.error('Error creating event:', error);
       toast.error("Failed to create event. Please try again.");
     }
   };
+
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
