@@ -1,5 +1,4 @@
 "use client";
-export const dynamic = "force-dynamic";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from 'react-hook-form';
