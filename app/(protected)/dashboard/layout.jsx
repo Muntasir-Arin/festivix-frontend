@@ -140,13 +140,27 @@ export const Logo = () => {
   return (
     <Link
       href="/"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+      className="font-normal flex items-center text-sm text-black py-1 relative z-20"
     >
-      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+          <Image 
+        src="/festivix.png" // Replace with the path to your image
+        alt="Icon" 
+        width={24} // Set the width of the image
+        height={24} // Set the height of the image
+        className="block dark:hidden"
+      />
+
+      <Image 
+        src="/festivix-dark.png" // Replace with the path to your image
+        alt="Icon" 
+        width={24} // Set the width of the image
+        height={24} // Set the height of the image
+        className="hidden dark:block"
+      />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="font-medium text-black dark:text-white whitespace-pre"
+        className="font-medium ml-2 text-black dark:text-white whitespace-pre"
       >
         FESTiViX
       </motion.span>
@@ -158,9 +172,23 @@ export const LogoIcon = () => {
   return (
     <Link
       href="/"
-      className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
+      className="font-normal flex items-center text-sm text-black py-1 relative z-20"
     >
-      <div className="h-5 w-6 bg-black dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <Image 
+    src="/festivix.png" // Replace with the path to your image
+    alt="Icon" 
+    width={24} // Set the width of the image
+    height={24} // Set the height of the image
+    className="block dark:hidden"
+  />
+
+  <Image 
+    src="/festivix-dark.png" // Replace with the path to your image
+    alt="Icon" 
+    width={24} // Set the width of the image
+    height={24} // Set the height of the image
+    className="hidden dark:block"
+  />
     </Link>
   );
 };

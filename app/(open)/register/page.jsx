@@ -151,7 +151,7 @@ export default function RegisterPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="projectmayhem@fc.com"
+              placeholder="Enter your email address"
             />
             {formErrors.email && <p className="text-red-500 text-sm">{formErrors.email}</p>}
           </LabelInputContainer>

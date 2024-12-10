@@ -56,6 +56,10 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
+      if (data.twoFactorToken) {
+        router.push(`/login/otp/${data.twoFactorToken}`);
+        return;
+      }
       const token = data.token;
       localStorage.setItem("authToken", token);
       setTimeout(() => {
