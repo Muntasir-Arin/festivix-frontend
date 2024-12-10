@@ -51,7 +51,7 @@ const eventFormSchema = z.object({
   location:z.any()
 });
 
-const uploadImageAndGetUrl = async (file) => {
+const uploadImageAndGetUrl = async (file: File) => {
   try {
     // Prepare the data for the image upload API
     const imageFormData = new FormData();
@@ -108,7 +108,7 @@ export default function EventForm() {
     try {
       const formData = new FormData();
 
-      const processFormData = async (data) => {
+      const processFormData = async (data: { name: string; category: string; description: string; date: string; time: string; latitude: string; longitude: string; ageRestriction: string; dynamicPricing: boolean; ticketSaleStart: string; ticketSaleEnd: string; venueType: string; themeColor: string; image?: File | undefined; imageurl?: string | undefined; maxPricingPercent?: number | undefined; location?: any; } | { [s: string]: unknown; } | ArrayLike<unknown>) => {
         for (const [key, value] of Object.entries(data)) {
           if (value instanceof File) {
             try {
