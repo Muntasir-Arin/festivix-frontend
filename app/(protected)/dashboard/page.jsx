@@ -4,7 +4,7 @@ import Image from "next/image";
 import axios from "axios";
 
 const Dashboard = () => {
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = React.useState(null);
   React.useEffect(() => {
     const fetchUserData = async () => {
       try {
