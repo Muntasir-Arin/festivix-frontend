@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-const UserDataContext = createContext<any>(null)
+const UserDataContext = createContext(null)
 
 export function useUserData() {
   const context = useContext(UserDataContext)
@@ -11,4 +11,3 @@ export function useUserData() {
 }
 
 export default UserDataContext
-

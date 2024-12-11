@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/(protected)/dashboard/page.jsx", "middleware.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/(protected)/dashboard/page.jsx", "middleware.js", "app/(protected)/dashboard/layout.tsx", "app/(protected)/dashboard/UserDataContext.jsx"],
   "exclude": ["node_modules"]
 }
