@@ -1,10 +1,31 @@
 "use client";
 import React from "react";
-import { useUserData } from "./layout";
 import Image from "next/image";
+import axios from "axios";
 
 const Dashboard = () => {
-  const userData = useUserData();
+  const [userData, setUserData] = useState(null);
+  React.useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/profile`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setUserData(response.data);
+      } catch {
+        router.push('/login');
+      }
+    };
+
+    fetchUserData();
+  }, []); 
+
   if (!userData) {
     return (
       <div className=" p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full">
