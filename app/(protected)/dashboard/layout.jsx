@@ -6,7 +6,6 @@ import {
   IconArrowLeft,
   IconBrandTabler,
   IconSettings,
-//   IconUserBolt,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -14,25 +13,20 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import UserDataContext from "./UserDataContext";
 
-export default function LayoutPage({ children }) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [userData, setUserData] = useState(null);
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  
 
   const handleLogout = () => {
-    // Clear localStorage
     localStorage.removeItem("authToken");
-    
-    // Clear cookies
     document.cookie.split(";").forEach((c) => {
       document.cookie = c
         .replace(/^ +/, "")
         .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
-    
-    // Redirect to login page
     router.push('/');
   };
 
@@ -55,7 +49,7 @@ export default function LayoutPage({ children }) {
     };
 
     fetchUserData();
-  }, [router]); 
+  }, [router]);
 
   const links = [
     {
@@ -65,13 +59,6 @@ export default function LayoutPage({ children }) {
         <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
-    // {
-    //   label: "Profile",
-    //   href: "#",
-    //   icon: (
-    //     <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-    //   ),
-    // },
     {
       label: "Settings",
       href: "/dashboard/settings",
@@ -89,13 +76,10 @@ export default function LayoutPage({ children }) {
   ];
 
   return (
-    <div
-      className={cn(
-        "rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1  border border-neutral-200 dark:border-neutral-700 overflow-hidden",
-        "h-screen" // for your use case, use `h-screen` instead of `h-[60vh]`
-      )}
-    >
-      {/* Sidebar */}
+    <div className={cn(
+      "rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 border border-neutral-200 dark:border-neutral-700 overflow-hidden",
+      "h-screen"
+    )}>
       <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
@@ -113,7 +97,7 @@ export default function LayoutPage({ children }) {
                 href: "#",
                 icon: (
                   <Image
-                    src={userData?.profilePicture ? `${userData.profilePicture}` : "https://i.imgur.com/p50u9jD.jpeg"}
+                    src={userData?.profilePicture || "https://i.imgur.com/p50u9jD.jpeg"}
                     className="h-7 w-7 flex-shrink-0 rounded-full"
                     width={50}
                     height={50}
@@ -126,35 +110,30 @@ export default function LayoutPage({ children }) {
         </SidebarBody>
       </Sidebar>
 
-      {/* Main Content Area */}
       <main className="flex-1 bg-gray-100 dark:bg-neutral-800">
-      <UserDataContext.Provider value={userData}>
-      {children}
-    </UserDataContext.Provider>
+        <UserDataContext.Provider value={userData}>
+          {children}
+        </UserDataContext.Provider>
       </main>
     </div>
   );
 }
 
-export const Logo = () => {
+function Logo() {
   return (
-    <Link
-      href="/"
-      className="font-normal flex items-center text-sm text-black py-1 relative z-20"
-    >
-          <Image 
-        src="/festivix.png" // Replace with the path to your image
+    <Link href="/" className="font-normal flex items-center text-sm text-black py-1 relative z-20">
+      <Image 
+        src="/festivix.png"
         alt="Icon" 
-        width={24} // Set the width of the image
-        height={24} // Set the height of the image
+        width={24}
+        height={24}
         className="block dark:hidden"
       />
-
       <Image 
-        src="/festivix-dark.png" // Replace with the path to your image
+        src="/festivix-dark.png"
         alt="Icon" 
-        width={24} // Set the width of the image
-        height={24} // Set the height of the image
+        width={24}
+        height={24}
         className="hidden dark:block"
       />
       <motion.span
@@ -166,44 +145,26 @@ export const Logo = () => {
       </motion.span>
     </Link>
   );
-};
+}
 
-export const LogoIcon = () => {
+function LogoIcon() {
   return (
-    <Link
-      href="/"
-      className="font-normal flex items-center text-sm text-black py-1 relative z-20"
-    >
+    <Link href="/" className="font-normal flex items-center text-sm text-black py-1 relative z-20">
       <Image 
-    src="/festivix.png" // Replace with the path to your image
-    alt="Icon" 
-    width={24} // Set the width of the image
-    height={24} // Set the height of the image
-    className="block dark:hidden"
-  />
-
-  <Image 
-    src="/festivix-dark.png" // Replace with the path to your image
-    alt="Icon" 
-    width={24} // Set the width of the image
-    height={24} // Set the height of the image
-    className="hidden dark:block"
-  />
+        src="/festivix.png"
+        alt="Icon" 
+        width={24}
+        height={24}
+        className="block dark:hidden"
+      />
+      <Image 
+        src="/festivix-dark.png"
+        alt="Icon" 
+        width={24}
+        height={24}
+        className="hidden dark:block"
+      />
     </Link>
   );
-};
+}
 
-
-
-  // Create a context for user data
-import { createContext, useContext } from 'react'
-  
-const UserDataContext = createContext(null)
-  
-  // Custom hook to use user data in child components
-export function useUserData() {
-    const context = useContext(UserDataContext)
-    if (context === undefined) {
-      throw new Error('useUserData must be used within a UserDataProvider')
-    }
-    return context}
