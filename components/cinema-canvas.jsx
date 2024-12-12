@@ -1,18 +1,11 @@
 'use client'
 
 import React, { useRef, useEffect, useState } from 'react'
-
-interface Seat {
-  id: string
-  row: string
-  number: number
-  price: number
-  isAvailable: boolean
-}
+import { Input } from "@/components/ui/input"
 
 // Generate seats data
-const generateSeats = (): Seat[] => {
-  const seats: Seat[] = []
+const generateSeats = () => {
+  const seats = []
   
   // Stalls seats (A-H)
   const stallsRows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
@@ -47,24 +40,20 @@ const generateSeats = (): Seat[] => {
   return seats
 }
 
-interface CinemaCanvasProps {
-  onSeatSelect: (seats: Seat[]) => void
-}
-
-const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+const CinemaCanvas = ({ onSeatSelect, isEditMode, prices, onPriceChange }) => {
+  const canvasRef = useRef(null)
+  const containerRef = useRef(null)
   const [scale, setScale] = useState(1)
-  const [seats] = useState<Seat[]>(generateSeats())
-  const [hoveredSeat, setHoveredSeat] = useState<string | null>(null)
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([])
+  const [seats, setSeats] = useState(generateSeats())
+  const [hoveredSeat, setHoveredSeat] = useState(null)
+  const [selectedSeats, setSelectedSeats] = useState([])
 
   const SEAT_SIZE = 30
   const SEAT_SPACING = 10
   const SCREEN_HEIGHT = 40
   const ROW_LABEL_WIDTH = 30
 
-  const drawScreen = (ctx: CanvasRenderingContext2D) => {
+  const drawScreen = (ctx) => {
     const screenWidth = 600 * scale
     const screenHeight = SCREEN_HEIGHT * scale
     const x = (ctx.canvas.width - screenWidth) / 2
@@ -82,12 +71,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     ctx.fillText('SCREEN', ctx.canvas.width / 2, y + screenHeight / 2)
   }
 
-  const drawSeat = (
-    ctx: CanvasRenderingContext2D,
-    seat: Seat,
-    x: number,
-    y: number
-  ) => {
+  const drawSeat = (ctx, seat, x, y) => {
     const size = SEAT_SIZE * scale
 
     ctx.beginPath()
@@ -121,11 +105,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     )
   }
 
-  const drawRowLabel = (
-    ctx: CanvasRenderingContext2D,
-    row: string,
-    y: number
-  ) => {
+  const drawRowLabel = (ctx, row, y) => {
     ctx.fillStyle = '#000'
     ctx.font = `${14 * scale}px Arial`
     ctx.textAlign = 'center'
@@ -142,7 +122,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     )
   }
 
-  const drawSeats = (ctx: CanvasRenderingContext2D) => {
+  const drawSeats = (ctx) => {
     const startY = SCREEN_HEIGHT * scale + 60 * scale
     let currentY = startY
 
@@ -189,7 +169,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     }
   }
 
-  const getSeatFromCoordinates = (x: number, y: number): Seat | null => {
+  const getSeatFromCoordinates = (x, y) => {
     const startY = SCREEN_HEIGHT * scale + 60 * scale
     let currentY = startY
 
@@ -197,7 +177,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     for (const row of ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']) {
       const rowSeats = seats.filter(seat => seat.row === row)
       const rowWidth = rowSeats.length * (SEAT_SIZE + SEAT_SPACING) * scale
-      let startX = (canvasRef.current!.width - rowWidth) / 2
+      let startX = (canvasRef.current.width - rowWidth) / 2
 
       for (const seat of rowSeats) {
         if (
@@ -220,7 +200,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     for (const row of ['J', 'K', 'L', 'M', 'N']) {
       const rowSeats = seats.filter(seat => seat.row === row)
       const rowWidth = rowSeats.length * (SEAT_SIZE + SEAT_SPACING) * scale
-      let startX = (canvasRef.current!.width - rowWidth) / 2
+      let startX = (canvasRef.current.width - rowWidth) / 2
 
       for (const seat of rowSeats) {
         if (
@@ -255,7 +235,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     }
   }
 
-  const render = (ctx: CanvasRenderingContext2D) => {
+  const render = (ctx) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
     drawScreen(ctx)
     drawSeats(ctx)
@@ -269,7 +249,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     }
   }, [seats, hoveredSeat, selectedSeats])
 
-  const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasClick = (event) => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -280,7 +260,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     const clickedSeat = getSeatFromCoordinates(x, y)
     
     if (clickedSeat && clickedSeat.isAvailable) {
-      let newSelectedSeats: string[]
+      let newSelectedSeats
       if (selectedSeats.includes(clickedSeat.id)) {
         newSelectedSeats = selectedSeats.filter(id => id !== clickedSeat.id)
       } else if (selectedSeats.length < 5) {
@@ -293,7 +273,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     }
   }
 
-  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (event) => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -305,6 +285,46 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
     setHoveredSeat(hoveredSeat?.id || null)
   }
 
+  const renderPriceInput = (seat) => {
+    if (!isEditMode) return null;
+
+    const startY = SCREEN_HEIGHT * scale + 60 * scale
+    let currentY = startY
+    let rowIndex = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N'].indexOf(seat.row)
+
+    if (rowIndex >= 8) {
+      currentY += 40 * scale // Add gap for balcony
+      rowIndex -= 8 // Adjust for balcony rows
+    }
+
+    currentY += rowIndex * (SEAT_SIZE + SEAT_SPACING) * scale
+
+    const rowSeats = seats.filter(s => s.row === seat.row)
+    const rowWidth = rowSeats.length * (SEAT_SIZE + SEAT_SPACING) * scale
+    let startX = (canvasRef.current.width - rowWidth) / 2
+    startX += (seat.number - 1) * (SEAT_SIZE + SEAT_SPACING) * scale
+
+    return (
+      <div
+        key={seat.id}
+        style={{
+          position: 'absolute',
+          left: `${startX}px`,
+          top: `${currentY}px`,
+          width: `${SEAT_SIZE * scale}px`,
+          height: `${SEAT_SIZE * scale}px`,
+        }}
+      >
+        <Input
+          type="number"
+          value={prices[seat.id] || seat.price}
+          onChange={(e) => onPriceChange(seat.id, Number(e.target.value))}
+          className="w-full h-full text-xs p-0 text-center"
+        />
+      </div>
+    )
+  }
+
   return (
     <div ref={containerRef} className="relative w-full">
       <canvas
@@ -313,6 +333,7 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
         onMouseMove={handleMouseMove}
         className="w-full h-auto border border-gray-300 rounded-md cursor-pointer"
       />
+      {isEditMode && seats.map(renderPriceInput)}
       <div className="absolute top-4 right-4 bg-white p-4 rounded-md shadow-md text-sm">
         <h3 className="font-semibold mb-2">Legend</h3>
         <div className="space-y-2">
@@ -335,4 +356,3 @@ const CinemaCanvas: React.FC<CinemaCanvasProps> = ({ onSeatSelect }) => {
 }
 
 export default CinemaCanvas
-

@@ -2,23 +2,12 @@
 
 import React, { useRef, useEffect, useState } from 'react'
 
-interface Zone {
-  id: string
-  name: string
-  price: number
-  ticketsRemaining: number
-  color: string
-  hoverColor: string
-  bookedColor: string
-  path: (ctx: CanvasRenderingContext2D, scale: number) => void
-}
-
-const zones: Zone[] = [
+const zones = [
   {
     id: 'north',
     name: 'North Stand',
     price: 30,
-    ticketsRemaining: 0,
+    ticketsRemaining: 100,
     color: '#90EE90',
     hoverColor: '#98FB98',
     bookedColor: '#D3D3D3',
@@ -64,31 +53,22 @@ const zones: Zone[] = [
   }
 ]
 
-interface StadiumCanvasProps {
-  onZoneSelect: (zone: Zone) => void
-}
-
-const StadiumCanvas: React.FC<StadiumCanvasProps> = ({ onZoneSelect }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [selectedZone, setSelectedZone] = useState<string | null>(null)
-  const [hoveredZone, setHoveredZone] = useState<string | null>(null)
+const StadiumCanvas = ({ onZoneSelect, prices, ticketsRemaining }) => {
+  const canvasRef = useRef(null)
+  const containerRef = useRef(null)
+  const [selectedZone, setSelectedZone] = useState(null)
+  const [hoveredZone, setHoveredZone] = useState(null)
   const [scale, setScale] = useState(1)
 
-  const drawZone = (
-    ctx: CanvasRenderingContext2D,
-    zone: Zone,
-    isSelected: boolean,
-    isHovered: boolean
-  ) => {
+  const drawZone = (ctx, zone, isSelected, isHovered) => {
     ctx.beginPath()
     zone.path(ctx, scale)
-    ctx.fillStyle = zone.ticketsRemaining === 0 
+    ctx.fillStyle = ticketsRemaining[zone.id] === 0 
       ? zone.bookedColor 
       : isHovered ? zone.hoverColor : zone.color
     ctx.fill()
     
-    if (isSelected && zone.ticketsRemaining > 0) {
+    if (isSelected && ticketsRemaining[zone.id] > 0) {
       ctx.strokeStyle = '#FFD700'
       ctx.lineWidth = 3 * scale
       ctx.stroke()
@@ -127,16 +107,17 @@ const StadiumCanvas: React.FC<StadiumCanvasProps> = ({ onZoneSelect }) => {
         break
     }
 
-    ctx.fillText(`${zone.name} - $${zone.price}`, textX, textY)
+    const price = prices[zone.id] || zone.price
+    ctx.fillText(`${zone.name} - $${price}`, textX, textY)
     ctx.font = `${14 * scale}px Arial`
-    ctx.fillText(`Tickets left: ${zone.ticketsRemaining}`, textX, textY + 20 * scale)
+    ctx.fillText(`Tickets left: ${ticketsRemaining[zone.id]}`, textX, textY + 20 * scale)
     
     if (zone.id === 'east' || zone.id === 'west') {
       ctx.restore()
     }
   }
 
-  const drawField = (ctx: CanvasRenderingContext2D) => {
+  const drawField = (ctx) => {
     // Draw field
     ctx.fillStyle = '#2E7D32'
     ctx.fillRect(100 * scale, 150 * scale, 600 * scale, 400 * scale)
@@ -173,7 +154,7 @@ const StadiumCanvas: React.FC<StadiumCanvasProps> = ({ onZoneSelect }) => {
     if (canvasRef.current && containerRef.current) {
       const containerWidth = containerRef.current.clientWidth
       const newScale = containerWidth / 800
-      setScale(1)
+      setScale(newScale)
 
       canvasRef.current.width = 800 * newScale
       canvasRef.current.height = 700 * newScale
@@ -186,7 +167,7 @@ const StadiumCanvas: React.FC<StadiumCanvasProps> = ({ onZoneSelect }) => {
     }
   }
 
-  const render = (ctx: CanvasRenderingContext2D) => {
+  const render = (ctx) => {
     ctx.clearRect(0, 0, 800, 700)
 
     // Draw all zones
@@ -209,9 +190,9 @@ const StadiumCanvas: React.FC<StadiumCanvasProps> = ({ onZoneSelect }) => {
     return () => {
       window.removeEventListener('resize', resizeCanvas)
     }
-  }, [selectedZone, hoveredZone])
+  }, [selectedZone, hoveredZone, prices, ticketsRemaining])
 
-  const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasClick = (event) => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -226,14 +207,14 @@ const StadiumCanvas: React.FC<StadiumCanvasProps> = ({ onZoneSelect }) => {
       ctx.beginPath()
       zone.path(ctx, 1)
 
-      if (ctx.isPointInPath(x, y) && zone.ticketsRemaining > 0) {
+      if (ctx.isPointInPath(x, y) && ticketsRemaining[zone.id] > 0) {
         setSelectedZone(zone.id)
         onZoneSelect(zone)
       }
     })
   }
 
-  const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleMouseMove = (event) => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -266,18 +247,18 @@ const StadiumCanvas: React.FC<StadiumCanvasProps> = ({ onZoneSelect }) => {
         ref={canvasRef}
         onClick={handleCanvasClick}
         onMouseMove={handleMouseMove}
-        className="w-full h-auto border  rounded-md cursor-pointer"
+        className="w-full h-auto border rounded-md cursor-pointer"
       />
       <div className="absolute top-4 right-4 bg-background border p-4 rounded-md shadow-md text-sm">
         <h3 className="font-semibold mb-2">Legend</h3>
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-[#90EE90]" />
-            <span>North/South - $30</span>
+            <span>North/South</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-[#87CEFA]" />
-            <span>East/West - $40</span>
+            <span>East/West</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-[#D3D3D3]" />
