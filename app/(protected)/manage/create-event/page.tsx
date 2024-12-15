@@ -31,55 +31,50 @@ import { Slider } from "@/components/ui/slider";
 import dynamic from 'next/dynamic';
 
 const MapInput = dynamic(() => import('@/components/map-input'), { ssr: false });
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 const eventFormSchema = z.object({
   name: z.string().min(2, "Event name must be at least 2 characters").max(100, "Event name must be less than 100 characters"),
-  category: z.string().min(1, "Please select a category"),
+  category: z.enum(['Concert', 'Conference', 'Sports', 'Workshop', 'Exhibition', 'Theater', 'Other']),
   description: z.string().min(10, "Description must be at least 10 characters").max(1000, "Description must be less than 1000 characters"),
   date: z.string().min(1, "Please select a date"),
   time: z.string().min(1, "Please select a time"),
-  latitude: z.string().regex(/^-?([1-8]?[1-9]|[1-9]0)\.{1}\d{1,6}$/, "Invalid latitude"),
-  longitude: z.string().regex(/^-?((1[0-7][0-9])|([1-9]?[0-9]))\.{1}\d{1,6}$/, "Invalid longitude"),
-  image: z.instanceof(File).optional(),
-  ageRestriction: z.string(),
-  dynamicPricing: z.boolean(),
-  maxPricingPercent: z.number().min(0).max(100).optional(),
-  ticketSaleStart: z.string().min(1, "Please select a start date"),
-  ticketSaleEnd: z.string().min(1, "Please select an end date"),
-  venueType: z.string().min(1, "Please select a venue type"),
+  coordinates: z.object({
+    lat: z.number(),
+    lon: z.number(),
+  }),
+  image: z
+  .instanceof(File)
+  .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+  .refine(
+    (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+    "Only .jpg, .jpeg, .png, .webp and .gif formats are supported."
+  ).optional(),
+logo: z
+  .instanceof(File)
+  .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
+  .refine(
+    (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
+    "Only .jpg, .jpeg, .png, .webp and .gif formats are supported."
+  ).optional(),
+  ageRestriction: z.number().min(0).max(21),
+  ticketSellStart: z.string().min(1, "Please select a start date"),
+  earlyBirdStart: z.string().optional(),
+  earlyBirdEnd: z.string().optional(),
+  earlyBirdDiscount: z.number().min(0).max(100).optional(),
   themeColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid color format"),
-  imageurl: z.string().optional(),
-  location:z.any()
-
+  dynamicPricingEnabled: z.boolean(),
+  dynamicPriceAdjustment: z.number().min(0).max(100).optional(),
+  venueType: z.enum(['Indoor', 'Outdoor', 'Hybrid', 'Virtual']),
+  location:z.any(),
 });
 type EventFormValues = z.infer<typeof eventFormSchema>;
 
-const uploadImageAndGetUrl = async (file: File): Promise<string> => {
-  // Implement your image upload logic here
-  // For now, we'll return a placeholder URL
-  return "https://example.com/placeholder-image.jpg";
-};
+
 function EventForm() {
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
-    defaultValues: {
-      name: "",
-      category: "",
-      description: "",
-      date: "",
-      time: "",
-      latitude: "",
-      longitude: "",
-      ageRestriction: "",
-      dynamicPricing: false,
-      maxPricingPercent: 5,
-      ticketSaleStart: "",
-      ticketSaleEnd: "",
-      venueType: "",
-      themeColor: "#000000",
-      location:'',
-      imageurl:''
-    },
   });
   const router = useRouter();
 
@@ -87,31 +82,7 @@ function EventForm() {
     try {
       const formData = new FormData();
       
-      for (const [key, value] of Object.entries(data)) {
-        if (value instanceof File) {
-          try {
-            const imageUrl = await uploadImageAndGetUrl(value);
-            formData.append('imageurl', imageUrl);
-          } catch (error) {
-            console.error('Error uploading image:', error);
-            toast.error("Failed to upload image. Please try again.");
-            return;
-          }
-        } else if (key === 'location') {
-          if (value) {
-            formData.append('latitude', value.lat.toString());
-            formData.append('longitude', value.lng.toString());
-          }
-        } else if (value !== undefined && value !== null) {
-          formData.append(key, value.toString());
-        }
-      }
 
-      // Log FormData content
-      console.log('FormData content:');
-      formData.forEach((value, key) => {
-        console.log(`${key}:`, value);
-      });
 
       // Uncomment the following lines when ready to submit to the server
       // const response = await axios.post('http://localhost:3000/api/events', formData, {
@@ -164,10 +135,13 @@ function EventForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="concert">Concert</SelectItem>
-                      <SelectItem value="seminar">Seminar</SelectItem>
-                      <SelectItem value="sports">Sports</SelectItem>
-                      <SelectItem value="festival">Festival</SelectItem>
+                      <SelectItem value="Concert">Concert</SelectItem>
+                      <SelectItem value="Conference">Conference</SelectItem>
+                      <SelectItem value="Sports">Sports</SelectItem>
+                      <SelectItem value="Workshop">Workshop</SelectItem>
+                      <SelectItem value="Exhibition">Exhibition</SelectItem>
+                      <SelectItem value="Theater">Theater</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -232,11 +206,10 @@ function EventForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="indoor">Indoor</SelectItem>
-                      <SelectItem value="outdoor">Outdoor</SelectItem>
-                      <SelectItem value="stadium">Stadium</SelectItem>
-                      <SelectItem value="arena">Arena</SelectItem>
-                      <SelectItem value="theater">Theater</SelectItem>
+                      <SelectItem value="Indoor">Indoor</SelectItem>
+                      <SelectItem value="Outdoor">Outdoor</SelectItem>
+                      <SelectItem value="Hybrid">Hybrid</SelectItem>
+                      <SelectItem value="Virtual">Virtual</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -246,17 +219,16 @@ function EventForm() {
 
             <FormField
               control={form.control}
-              name="location"
+              name="coordinates"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Event Location</FormLabel>
                   <FormControl>
                     <MapInput
-                      onLocationSelect={(lat, lng) => {
-                        form.setValue('latitude', lat.toString());
-                        form.setValue('longitude', lng.toString());
+                      onLocationSelect={(lat, lon) => {
+                        form.setValue('coordinates', { lat, lon });
                       }}
-                    />
+                    />  
                   </FormControl>
                   <FormDescription>
                     Click on the map to set the event location
@@ -271,10 +243,48 @@ function EventForm() {
               name="image"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Event Image/Poster</FormLabel>
+                  <FormLabel>Event Image</FormLabel>
                   <FormControl>
-                    <Input type="file" onChange={(e) => field.onChange(e.target.files?.[0])} />
+                    <Input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          field.onChange(file);
+                        }
+                      }}
+                    />
                   </FormControl>
+                  <FormDescription>
+                    Upload an image for your event (max 5MB)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="logo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Event Logo</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          field.onChange(file);
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Upload a logo for your event (max 5MB)
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -286,18 +296,10 @@ function EventForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Age Restriction</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select age restriction" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="all">All Ages</SelectItem>
-                      <SelectItem value="18+">18+</SelectItem>
-                      <SelectItem value="21+">21+</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <Input type="number" min="0" max="21" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} />
+                  </FormControl>
+                  <FormDescription>Enter 0 for no age restriction</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -305,7 +307,7 @@ function EventForm() {
 
             <FormField
               control={form.control}
-              name="dynamicPricing"
+              name="dynamicPricingEnabled"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
@@ -324,13 +326,13 @@ function EventForm() {
               )}
             />
 
-            {form.watch('dynamicPricing') && (
+            {form.watch('dynamicPricingEnabled') && (
               <FormField
                 control={form.control}
-                name="maxPricingPercent"
+                name="dynamicPriceAdjustment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Max Addition/Subtraction Percent</FormLabel>
+                    <FormLabel>Dynamic Price Adjustment (%)</FormLabel>
                     <FormControl>
                       <Slider
                         min={0}
@@ -352,7 +354,7 @@ function EventForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="ticketSaleStart"
+                name="ticketSellStart"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Ticket Sale Start</FormLabel>
@@ -366,12 +368,48 @@ function EventForm() {
 
               <FormField
                 control={form.control}
-                name="ticketSaleEnd"
+                name="earlyBirdStart"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Ticket Sale End</FormLabel>
+                    <FormLabel>Early Bird Start</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="earlyBirdEnd"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Early Bird End</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="earlyBirdDiscount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Early Bird Discount (%)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        min="0" 
+                        max="100" 
+                        {...field} 
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
