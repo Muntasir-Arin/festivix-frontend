@@ -60,6 +60,8 @@ logo: z
   ).optional(),
   ageRestriction: z.number().min(0).max(21),
   ticketSellStart: z.string().min(1, "Please select a start date"),
+  ticketSellEnd: z.string().min(1, "Please select an end date"),
+  earlyBirdEnabled: z.boolean(),
   earlyBirdStart: z.string().optional(),
   earlyBirdEnd: z.string().optional(),
   earlyBirdDiscount: z.number().min(0).max(100).optional(),
@@ -75,29 +77,91 @@ type EventFormValues = z.infer<typeof eventFormSchema>;
 function EventForm() {
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
+    defaultValues: {
+      name: "",
+      category: undefined,
+      description: "",
+      date: "",
+      time: "",
+      coordinates: { lat: 0, lon: 0 },
+      image: undefined,
+      logo: undefined,
+      ageRestriction: 0,
+      ticketSellStart: "",
+      ticketSellEnd: "",
+      earlyBirdEnabled: false,
+      earlyBirdStart: "",
+      earlyBirdEnd: "",
+      earlyBirdDiscount: 0,
+      themeColor: "#000000",
+      dynamicPricingEnabled: false,
+      dynamicPriceAdjustment: 0,
+      venueType: undefined,
+      location: "",
+    },
   });
+  
   const router = useRouter();
 
   const onSubmit = async (data: EventFormValues) => {
     try {
       const formData = new FormData();
       
-
-
-      // Uncomment the following lines when ready to submit to the server
-      // const response = await axios.post('http://localhost:3000/api/events', formData, {
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      // });
-      // toast.success("Event created successfully!");
-      // router.push('/events');
-
+      // Add fields to FormData (manually map them)
+      formData.append("name", data.name);
+      formData.append("category", data.category);
+      formData.append("description", data.description);
+      formData.append("date", data.date);
+      formData.append("time", data.time);
+      formData.append("coordinates[lat]", data.coordinates.lat.toString());
+      formData.append("coordinates[lon]", data.coordinates.lon.toString());
+      formData.append("ageRestriction", data.ageRestriction.toString());
+      formData.append("ticketSellStart", data.ticketSellStart);
+      formData.append("ticketSellEnd", data.ticketSellEnd);
+      formData.append("earlyBirdEnabled", data.earlyBirdEnabled.toString());
+      if (data.earlyBirdEnabled) {
+        if (data.earlyBirdStart) formData.append("earlyBirdStart", data.earlyBirdStart);
+        if (data.earlyBirdEnd) formData.append("earlyBirdEnd", data.earlyBirdEnd);
+        if (data.earlyBirdDiscount) formData.append("earlyBirdDiscount", data.earlyBirdDiscount.toString());
+      }
+      if (data.earlyBirdStart) formData.append("earlyBirdStart", data.earlyBirdStart);
+      if (data.earlyBirdEnd) formData.append("earlyBirdEnd", data.earlyBirdEnd);
+      if (data.earlyBirdDiscount) formData.append("earlyBirdDiscount", data.earlyBirdDiscount.toString());
+      if (data.dynamicPriceAdjustment) formData.append("dynamicPriceAdjustment", data.dynamicPriceAdjustment.toString());
+      if (data.themeColor) formData.append("themeColor", data.themeColor);
+  
+      formData.append("dynamicPricingEnabled", data.dynamicPricingEnabled.toString());
+      formData.append("venueType", data.venueType);
+  
+      if (data.image) formData.append("image", data.image);
+      if (data.logo) formData.append("logo", data.logo);
+  
+      // Log FormData for debugging
+      console.log("FormData being sent:");
+      for (const [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+      const token = localStorage.getItem("authToken");
+  
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/event`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+  
+      toast.success("Event created successfully!");
+      // router.push("/events");
     } catch (error) {
-      console.error('Error creating event:', error);
+      console.error("Error creating event:", error);
       toast.error("Failed to create event. Please try again.");
     }
   };
+  
 
 
   return (
@@ -193,29 +257,7 @@ function EventForm() {
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="venueType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Venue Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select venue type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Indoor">Indoor</SelectItem>
-                      <SelectItem value="Outdoor">Outdoor</SelectItem>
-                      <SelectItem value="Hybrid">Hybrid</SelectItem>
-                      <SelectItem value="Virtual">Virtual</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            
 
             <FormField
               control={form.control}
@@ -368,10 +410,10 @@ function EventForm() {
 
               <FormField
                 control={form.control}
-                name="earlyBirdStart"
+                name="ticketSellEnd"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Early Bird Start</FormLabel>
+                    <FormLabel>Ticket Sale End</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -381,42 +423,104 @@ function EventForm() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="earlyBirdEnd"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Early Bird End</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="earlyBirdEnabled"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Early Bird Pricing</FormLabel>
+                    <FormDescription>
+                      Enable early bird pricing for this event
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="earlyBirdDiscount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Early Bird Discount (%)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        min="0" 
-                        max="100" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {form.watch('earlyBirdEnabled') && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="earlyBirdStart"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Early Bird Start</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
+                  <FormField
+                    control={form.control}
+                    name="earlyBirdEnd"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Early Bird End</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="earlyBirdDiscount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Early Bird Discount (%)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min="0" 
+                          max="100" 
+                          {...field} 
+                          onChange={(e) => field.onChange(parseInt(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+            
+            <FormField
+              control={form.control}
+              name="venueType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Venue Type</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select venue type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Indoor">Indoor</SelectItem>
+                      <SelectItem value="Outdoor">Outdoor</SelectItem>
+                      <SelectItem value="Hybrid">Hybrid</SelectItem>
+                      <SelectItem value="Virtual">Virtual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="themeColor"

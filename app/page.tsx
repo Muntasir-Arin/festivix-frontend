@@ -1,9 +1,35 @@
+'use client'
 import { FloatingNav } from "@/components/ui/floating-navbar";
 import { FaCompass, FaHeart, FaHome, FaStore } from "react-icons/fa";
 import Image from "next/image";
 import { ModeToggle } from "@/components/theme-mode";
 import {HomePageCards} from "@/components/homepage-card";
+import { useEffect } from "react";
+import { toast } from "sonner";
 export default function Home() {
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const logSlowServer = setTimeout(() => {
+        toast('Slow backend server', {
+          description: "The server is hosted on Render's free tier and may experience delays.",
+        });
+      }, 1500);
+
+      try {
+        // Fetch API request
+        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}`);
+      } catch (err) {
+        console.error('Error fetching data:');
+      } finally {
+        // Clear the timeout if the fetch request finishes within 1 second
+        clearTimeout(logSlowServer);
+      }
+    };
+
+    // Trigger the fetch as soon as the page loads
+    fetchData();
+  }, []);
   return (
     (<div>
       <ModeToggle/>
