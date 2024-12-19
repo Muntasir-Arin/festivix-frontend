@@ -29,13 +29,15 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import dynamic from 'next/dynamic';
-import { InfoIcon } from 'lucide-react'
+import { InfoIcon, Loader2 } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 
 const MapInput = dynamic(() => import('@/components/map-input'), { ssr: false });
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -57,7 +59,7 @@ const eventFormSchema = z.object({
     .refine(
       (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
       "Only .jpg, .jpeg, .png, .webp and .gif formats are supported."
-    ),
+    ).optional(),
   logo: z
     .instanceof(File)
     .refine((file) => file.size <= MAX_FILE_SIZE, `Max file size is 5MB.`)
@@ -81,7 +83,12 @@ const eventFormSchema = z.object({
 });
 type EventFormValues = z.infer<typeof eventFormSchema>;
 
-function EventForm() {
+function EditEventForm() {
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+  const params = useParams();
+  const eventId = params.id;
+
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
@@ -108,49 +115,85 @@ function EventForm() {
       refundPercentage: 100,
     },
   });
-  
-  const router = useRouter();
+
+  useEffect(() => {
+    const fetchEventData = async () => {
+      setIsLoading(true);
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/event/get/${eventId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const eventData = response.data.event;
+        
+        const formatDate = (dateString: string | undefined) =>
+          dateString ? new Date(dateString).toISOString().split("T")[0] : "";
+
+        form.reset({
+          name: eventData.name || "",
+          category: eventData.category || undefined,
+          description: eventData.description || "",
+          date: formatDate(eventData.date),
+          time: eventData.time || "",
+          coordinates: eventData.coordinates || { lat: 0, lon: 0 },
+          ageRestriction: eventData.ageRestriction || 'Allow All',
+          ticketSellStart: formatDate(eventData.ticketSellStart),
+        ticketSellEnd: formatDate(eventData.ticketSellEnd),
+          earlyBirdEnabled: eventData.earlyBirdEnabled || false,
+          earlyBirdStart: formatDate(eventData.earlyBirdStart),
+        earlyBirdEnd: formatDate(eventData.earlyBirdEnd),
+          earlyBirdDiscount: eventData.earlyBirdDiscount || 0,
+          themeColor: eventData.themeColor || "#000000",
+          dynamicPricingEnabled: eventData.dynamicPricingEnabled || false,
+          dynamicPriceAdjustment: eventData.dynamicPriceAdjustment || 0,
+          venueLayout: eventData.venueLayout || undefined,
+          location: eventData.location || "",
+          refundPercentage: eventData.refundPercentage || 100,
+        });
+
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching event data:", error);
+        toast.error("Failed to load event data. Please try again.");
+        setIsLoading(false);
+      }
+    };
+
+    if (eventId) {
+      fetchEventData();
+    }
+  }, [eventId, form]);
 
   const onSubmit = async (data: EventFormValues) => {
     try {
       const formData = new FormData();
       
       // Add fields to FormData (manually map them)
-      formData.append("name", data.name);
-      formData.append("category", data.category);
-      formData.append("description", data.description);
-      formData.append("date", data.date);
-      formData.append("time", data.time);
-      formData.append("coordinates[lat]", data.coordinates.lat.toString());
-      formData.append("coordinates[lon]", data.coordinates.lon.toString());
-      formData.append("ageRestriction", data.ageRestriction);
-      formData.append("ticketSellStart", data.ticketSellStart);
-      formData.append("ticketSellEnd", data.ticketSellEnd);
-      formData.append("earlyBirdEnabled", data.earlyBirdEnabled.toString());
-      if (data.earlyBirdEnabled) {
-        if (data.earlyBirdStart) formData.append("earlyBirdStart", data.earlyBirdStart);
-        if (data.earlyBirdEnd) formData.append("earlyBirdEnd", data.earlyBirdEnd);
-        if (data.earlyBirdDiscount) formData.append("earlyBirdDiscount", data.earlyBirdDiscount.toString());
-      }
-      if (data.dynamicPriceAdjustment) formData.append("dynamicPriceAdjustment", data.dynamicPriceAdjustment.toString());
-      if (data.themeColor) formData.append("themeColor", data.themeColor);
-  
-      formData.append("dynamicPricingEnabled", data.dynamicPricingEnabled.toString());
-      formData.append("venueLayout", data.venueLayout);
-      formData.append("refundPercentage", data.refundPercentage.toString());
-  
-      if (data.image) formData.append("image", data.image);
-      if (data.logo) formData.append("logo", data.logo);
-      formData.append("location", data.location);
-      // Log FormData for debugging
-      console.log("FormData being sent:");
-      for (const [key, value] of formData.entries()) {
-        console.log(key, value);
-      }
+      Object.keys(data).forEach((key) => {
+        const value = data[key as keyof EventFormValues];
+        console.log(key, value)
+        if (value !== undefined) {
+          if (key === 'coordinates') {
+            formData.append("coordinates[lat]", (value as {lat: number, lon: number}).lat.toString());
+            formData.append("coordinates[lon]", (value as {lat: number, lon: number}).lon.toString());
+          } else if (value instanceof File) {
+            formData.append(key, value);
+          } else {
+            formData.append(key, value.toString());
+          }
+        }
+      });
+
+
       const token = localStorage.getItem("authToken");
   
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/event`,
+      const response = await axios.patch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/event/patch/${eventId}`,
         formData,
         {
           headers: {
@@ -160,18 +203,25 @@ function EventForm() {
         }
       );
   
-      toast.success("Event created successfully!");
-      // router.push("/events");
+      toast.success("Event updated successfully!");
     } catch (error) {
-      console.error("Error creating event:", error);
-      toast.error("Failed to create event. Please try again.");
+      console.error("Error updating event:", error);
+      toast.error("Failed to update event. Please try again.");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Create New Event</CardTitle>
+        <CardTitle>Edit Event</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -314,7 +364,7 @@ function EventForm() {
                     />
                   </FormControl>
                   <FormDescription>
-                    Upload an image for your event (max 5MB)
+                    Upload a new image for your event (max 5MB)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -340,7 +390,7 @@ function EventForm() {
                     />
                   </FormControl>
                   <FormDescription>
-                    Upload a logo for your event (max 5MB)
+                    Upload a new logo for your event (max 5MB)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -511,7 +561,7 @@ function EventForm() {
                   />
                 </div>
 
-                <p className="text-sm text-muted-foreground"> If the Early Bird dates overlap with the ticket sale dates, priority will be given to the Early Bird dates.</p>
+                <p className="text-sm text-muted-foreground">If the Early Bird dates overlap with the ticket sale dates, priority will be given to the Early Bird dates.</p>
 
                 <FormField
                   control={form.control}
@@ -541,7 +591,7 @@ function EventForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Venue Layout</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={true}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select venue layout" />
@@ -558,8 +608,6 @@ function EventForm() {
                 </FormItem>
               )}
             />
-
-
 
             <FormField
               control={form.control}
@@ -586,7 +634,8 @@ function EventForm() {
                 </FormItem>
               )}
             />
-                        <FormField
+
+            <FormField
               control={form.control}
               name="refundPercentage"
               render={({ field }) => (
@@ -611,15 +660,13 @@ function EventForm() {
 
             <FormItem>
               <FormDescription className="text-sm text-muted-foreground">
-
-                  Festivix rules require that refunds must be available. However, please note that refunds will not be available within 48 hours of the event start time. This policy ensures a fair balance between attendee flexibility and event planning stability.
-
+                Festivix rules require that refunds must be available. However, please note that refunds will not be available within 48 hours of the event start time. This policy ensures a fair balance between attendee flexibility and event planning stability.
               </FormDescription>
             </FormItem>
 
             <div className="flex justify-between pt-6">
               <Button variant="outline" type="button" onClick={() => router.back()}>Cancel</Button>
-              <Button type="submit">Create Event</Button>
+              <Button type="submit">Update Event</Button>
             </div>
           </form>
         </Form>
@@ -628,10 +675,10 @@ function EventForm() {
   );
 }
 
-export default function EventPage() {
+export default function EditEventPage() {
   return (
     <div className="container mx-auto py-10">
-      <EventForm />
+      <EditEventForm />
     </div>
   );
 }

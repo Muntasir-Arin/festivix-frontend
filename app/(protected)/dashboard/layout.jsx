@@ -6,6 +6,7 @@ import {
   IconArrowLeft,
   IconBrandTabler,
   IconSettings,
+  IconCalendarBolt 
 //   IconUserBolt,
 } from "@tabler/icons-react";
 import Link from "next/link";
@@ -64,6 +65,7 @@ export default function LayoutPage({ children }) {
       icon: (
         <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
+      permission: 'User'
     },
     // {
     //   label: "Profile",
@@ -78,6 +80,15 @@ export default function LayoutPage({ children }) {
       icon: (
         <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
+      permission: 'User'
+    },
+    {
+      label: "Event Manager",
+      href: "/dashboard/event-manager",
+      icon: (
+        <IconCalendarBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+      permission: 'Manager'
     },
     {
       label: "Logout",
@@ -85,6 +96,7 @@ export default function LayoutPage({ children }) {
       icon: (
         <IconArrowLeft className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
+      permission: 'User'
     },
   ];
 
@@ -102,7 +114,7 @@ export default function LayoutPage({ children }) {
             {open ? <Logo /> : <LogoIcon />}
             <div className="mt-8 flex flex-col gap-2">
               {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
+                userData?.role.includes(link.permission) ? ( <SidebarLink key={idx} link={link} /> ) : null
               ))}
             </div>
           </div>

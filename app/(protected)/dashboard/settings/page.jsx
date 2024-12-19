@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { Input } from "@/components/ui/input-cn";
 import { toast } from "sonner";
+import { Loader2 } from 'lucide-react'
 
 
 const countryList = [
@@ -71,6 +72,8 @@ const FormSchema = z.object({
 });
 
 const Settings = () => {
+  const [isLoading, setIsLoading] = React.useState(true)
+
   // Initialize the form with react-hook-form
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -84,6 +87,7 @@ const Settings = () => {
 
   // Fetch default values for the form (you can replace the URL with your API endpoint)
   React.useEffect(() => {
+    setIsLoading(true)
     const fetchProfileData = async () => {
       try {
         const token = localStorage.getItem("authToken");
@@ -108,6 +112,8 @@ const Settings = () => {
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
+      }finally {
+        setIsLoading(false)
       }
     };
 
@@ -152,7 +158,13 @@ const Settings = () => {
       }
     }
   };
-
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
   return (
     <div className="flex flex-1 h-screen">
       <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full">
