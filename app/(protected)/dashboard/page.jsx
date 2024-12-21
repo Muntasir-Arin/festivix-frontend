@@ -5,6 +5,7 @@ import Image from "next/image";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input-cn";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
@@ -38,12 +39,12 @@ const Dashboard = () => {
         );
         setUserData(response.data);
       } catch {
-        router.push('/login');
+        router.push("/login");
       }
     };
 
     fetchUserData();
-  }, []); 
+  }, []);
 
   const handleApplyManager = async () => {
     setIsApplyingManager(true);
@@ -76,10 +77,14 @@ const Dashboard = () => {
   }
 
   const getRoleColor = (role) => {
-    if (role.includes("Admin")) return "from-orange-400 via-orange-600 to-orange-700";
-    if (role.includes("Moderator")) return "from-yellow-400 via-yellow-600 to-yellow-700";
-    if (role.includes("Manager")) return "from-green-400 via-green-600 to-green-700";
-    if (role.includes("Affiliate")) return "from-purple-400 via-purple-600 to-purple-700";
+    if (role.includes("Admin"))
+      return "from-orange-400 via-orange-600 to-orange-700";
+    if (role.includes("Moderator"))
+      return "from-yellow-400 via-yellow-600 to-yellow-700";
+    if (role.includes("Manager"))
+      return "from-green-400 via-green-600 to-green-700";
+    if (role.includes("Affiliate"))
+      return "from-purple-400 via-purple-600 to-purple-700";
     return "from-blue-400 via-blue-600 to-blue-700";
   };
 
@@ -109,74 +114,102 @@ const Dashboard = () => {
                   Country: {userData.country}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Joined: {new Date(userData.createdAt).toISOString().split("T")[0]}
+                  Joined:{" "}
+                  {new Date(userData.createdAt).toISOString().split("T")[0]}
                 </p>
               </div>
             </div>
           )}
         </div>
-        <div className="flex gap-2 mb-2">
-          <div className={`h-20 w-1/3 rounded-lg flex items-center justify-center bg-gradient-to-r ${getRoleColor(userData.role)}`}>
+        <div className="flex gap-2 mb-2 justify-center">
+          <Button
+            variant="outline"
+            className={`min-h-[5rem] w-1/4 rounded-lg flex items-center justify-center bg-gradient-to-r ${getRoleColor(
+              userData.role
+            )}`}
+          >
             <div className="text-white text-center p-4">
-              <p className="text-lg font-semibold mb-1">
-                {userData.role.includes("Admin") ? "Admin" :
-                 userData.role.includes("Moderator") ? "Moderator" :
-                 userData.role.includes("Manager") ? "Manager" :
-                 userData.role.includes("Affiliate") ? "Affiliate" : "User"}
+              <p className="sm:text-lg font-semibold mb-1 text-md">
+                {userData.role.includes("Admin")
+                  ? "Admin"
+                  : userData.role.includes("Moderator")
+                  ? "Moderator"
+                  : userData.role.includes("Manager")
+                  ? "Manager"
+                  : userData.role.includes("Affiliate")
+                  ? "Affiliate"
+                  : "User"}
               </p>
-              <p className="text-sm opacity-80">
-                {userData.role.includes("Admin") ? "Full access granted" :
-                 userData.role.includes("Moderator") ? "Moderation privileges" :
-                 userData.role.includes("Manager") ? "Event management access" :
-                 userData.role.includes("Affiliate") ? "Affiliate program member" : "Standard user access"}
+              <p className="sm:text-sm opacity-80 text-xs">
+                {userData.role.includes("Admin")
+                  ? "Full access granted"
+                  : userData.role.includes("Moderator")
+                  ? "Moderation privileges"
+                  : userData.role.includes("Manager")
+                  ? "Event management access"
+                  : userData.role.includes("Affiliate")
+                  ? "Affiliate program member"
+                  : "Standard user access"}
               </p>
             </div>
-          </div>
-          <div className="h-20 w-1/3 rounded-lg flex items-center justify-center bg-gray-100 dark:bg-neutral-800">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">
-                {userData.role.includes("Manager") ? "Event Management" : "Become a Manager"}
-              </h3>
+          </Button>
+          <div className="w-1/4">
+            <div className="text-center ">
               {!userData.role.includes("Manager") ? (
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button variant="outline">Apply Now</Button>
+                    <Button
+                      variant="outline"
+                      className="min-h-[5rem] w-full rounded-lg text-xs sm:text-base"
+                    >
+                      Become a Manager
+                    </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
+                  <DialogContent className="sm:max-w-[625px]">
                     <DialogHeader>
                       <DialogTitle>Apply for Manager Role</DialogTitle>
                       <DialogDescription>
-                        Please provide a reason for your application. We'll review your request and get back to you.
+                        Please provide a reason for your application. We'll
+                        review your request and get back to you.
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                      <div className="grid grid-cols-4 items-center gap-4">
+                      <div className="grid grid-cols-6 items-center gap-4">
                         <Label htmlFor="reason" className="text-right">
                           Reason
                         </Label>
-                        <Input
-                          id="reason"
-                          className="col-span-3"
-                          value={applicationReason}
-                          onChange={(e) => setApplicationReason(e.target.value)}
-                        />
+                        <Textarea id="reason" className="col-span-5" value={applicationReason}
+                          onChange={(e) => setApplicationReason(e.target.value)} />   
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button type="submit" onClick={handleApplyManager} disabled={isApplyingManager}>
+                      <Button
+                        type="submit"
+                        onClick={handleApplyManager}
+                        disabled={isApplyingManager}
+                      >
                         {isApplyingManager ? "Applying..." : "Apply"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               ) : (
-                <Button variant="outline" onClick={() => router.push('/dashboard/event-manager')}>
-                  Access Dashboard
+                <Button
+                  variant="outline"
+                  className="min-h-[5rem] w-full rounded-lg"
+                  onClick={() => router.push("/dashboard/event-manager")}
+                >
+                  Access Event Dashboard
                 </Button>
               )}
             </div>
           </div>
-          <div className="h-20 w-1/3 rounded-lg bg-gray-100 dark:bg-neutral-800"></div>
+          <Button variant="outline" className="min-h-[5rem] w-1/4 rounded-lg">
+            {/* Placeholder for third button */}
+          </Button>
+          <Button variant="outline" className="min-h-[5rem] w-1/4 rounded-lg">
+            {/* Placeholder for fourth button */}
+          </Button>
         </div>
         <div className="flex gap-2 flex-1">
           {[...new Array(2)].map((_, idx) => (
@@ -192,4 +225,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

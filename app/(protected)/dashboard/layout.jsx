@@ -6,7 +6,8 @@ import {
   IconArrowLeft,
   IconBrandTabler,
   IconSettings,
-  IconCalendarBolt 
+  IconCalendarBolt ,
+  IconUsersPlus 
 //   IconUserBolt,
 } from "@tabler/icons-react";
 import Link from "next/link";
@@ -65,7 +66,7 @@ export default function LayoutPage({ children }) {
       icon: (
         <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
-      permission: 'User'
+      permission: ['User']
     },
     // {
     //   label: "Profile",
@@ -75,12 +76,12 @@ export default function LayoutPage({ children }) {
     //   ),
     // },
     {
-      label: "Settings",
-      href: "/dashboard/settings",
+      label: "Manager Request",
+      href: "/dashboard/manager-request",
       icon: (
-        <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <IconUsersPlus  className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
-      permission: 'User'
+      permission: ['Admin', "Moderator"]
     },
     {
       label: "Event Manager",
@@ -88,7 +89,15 @@ export default function LayoutPage({ children }) {
       icon: (
         <IconCalendarBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
-      permission: 'Manager'
+      permission: ['Manager']
+    },
+    {
+      label: "Settings",
+      href: "/dashboard/settings",
+      icon: (
+        <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+      permission: ['User']
     },
     {
       label: "Logout",
@@ -96,7 +105,7 @@ export default function LayoutPage({ children }) {
       icon: (
         <IconArrowLeft className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
-      permission: 'User'
+      permission: ['User']
     },
   ];
 
@@ -114,7 +123,7 @@ export default function LayoutPage({ children }) {
             {open ? <Logo /> : <LogoIcon />}
             <div className="mt-8 flex flex-col gap-2">
               {links.map((link, idx) => (
-                userData?.role.includes(link.permission) ? ( <SidebarLink key={idx} link={link} /> ) : null
+                userData?.role.some(role =>link.permission.includes(role) ) ? ( <SidebarLink key={idx} link={link} /> ) : null
               ))}
             </div>
           </div>
