@@ -1,6 +1,5 @@
 'use client'
-
-import { useState } from 'react'
+import React, { useState } from "react";
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +12,7 @@ export default function ResetPasswordPage({ params }) {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const unwrappedParams = React.use(params)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -24,10 +24,10 @@ export default function ResetPasswordPage({ params }) {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/reset-password', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/verifyreset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: params.id, password }),
+        body: JSON.stringify({ resetToken: unwrappedParams.id, newPassword:password }),
       })
 
       if (response.ok) {

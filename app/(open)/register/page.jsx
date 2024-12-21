@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "../../../components/custom-select";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { ModeToggle } from "@/components/theme-mode";
 
 // Country list
 const countryList = [
@@ -56,6 +57,8 @@ const schema = z.object({
 });
 
 export default function RegisterPage() {
+  const [isClient, setIsClient] = useState(false)
+  React.useEffect(() => { setIsClient(true) }, [])
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -127,7 +130,7 @@ export default function RegisterPage() {
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Tyler"
+              placeholder="First Name"
             />
             {formErrors.firstName && <p className="text-red-500 text-sm">{formErrors.firstName}</p>}
           </LabelInputContainer>
@@ -139,7 +142,7 @@ export default function RegisterPage() {
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              placeholder="Durden"
+              placeholder="Last Name"
             />
             {formErrors.lastName && <p className="text-red-500 text-sm">{formErrors.lastName}</p>}
           </LabelInputContainer>
@@ -209,6 +212,7 @@ export default function RegisterPage() {
           </div>
         </form>
       </div>
+      {isClient ? <ModeToggle/> : null}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,8 @@ const loginSchema = z.object({
 });
 
 export default function LoginPage() {
+  const [isClient, setIsClient] = useState(false)
+  useEffect(() => { setIsClient(true) }, [])
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -82,14 +84,14 @@ export default function LoginPage() {
         </h2>
         <p className="text-neutral-600 dark:text-neutral-400">Connect to exciting events and manage your bookings all in one place.</p>
         
-        <ModeToggle/>
+        {isClient ? <ModeToggle/> : null}
 
         <form className="my-8" onSubmit={handleSubmit} noValidate>
           <LabelInputContainer className="mb-4">
             <Label htmlFor="email">Email Address</Label>
             <Input
               id="email"
-              placeholder="projectmayhem@fc.com"
+              placeholder="Enter your email address"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

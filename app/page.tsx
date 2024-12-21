@@ -4,11 +4,13 @@ import { FaCompass, FaHeart, FaHome, FaStore } from "react-icons/fa";
 import Image from "next/image";
 import { ModeToggle } from "@/components/theme-mode";
 import {HomePageCards} from "@/components/homepage-card";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 export default function Home() {
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
     const fetchData = async () => {
       const logSlowServer = setTimeout(() => {
         toast('Slow backend server', {
@@ -32,7 +34,7 @@ export default function Home() {
   }, []);
   return (
     (<div>
-      <ModeToggle/>
+      {isClient ? <ModeToggle/> : null}
       <FloatingNav
         navItems={[
           { name: "Home", link: "/", icon: <FaHome /> },
