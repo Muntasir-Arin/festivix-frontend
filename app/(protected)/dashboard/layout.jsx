@@ -7,7 +7,8 @@ import {
   IconBrandTabler,
   IconSettings,
   IconCalendarBolt ,
-  IconUsersPlus 
+  IconUsersPlus,
+  IconUserEdit
 //   IconUserBolt,
 } from "@tabler/icons-react";
 import Link from "next/link";
@@ -75,6 +76,14 @@ export default function LayoutPage({ children }) {
     //     <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
     //   ),
     // },
+    { 
+      label: "Users Control",
+      href: "/dashboard/users-control",
+      icon: (
+        <IconUserEdit  className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+      permission: ['Admin', "Moderator"]
+    },
     {
       label: "Manager Request",
       href: "/dashboard/manager-request",
@@ -83,6 +92,8 @@ export default function LayoutPage({ children }) {
       ),
       permission: ['Admin', "Moderator"]
     },
+   
+
     {
       label: "Event Manager",
       href: "/dashboard/event-manager",
