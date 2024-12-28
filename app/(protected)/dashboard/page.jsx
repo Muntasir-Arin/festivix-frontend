@@ -1,106 +1,85 @@
-"use client";
-import React from "react";
-import { useUserData } from "./layout";
-import Image from "next/image";
+'use client';
 
-const Dashboard = () => {
-  const userData = useUserData();
-  if (!userData) {
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const CampaignsPage = () => {
+    const [campaigns, setCampaigns] = useState([]);
+    const [formData, setFormData] = useState({
+        name: '',
+        description: '',
+        audience: '',
+    });
+
+    // Fetch campaigns from backend
+    useEffect(() => {
+        axios.get('http://localhost:8000/api/campaigns')
+            .then(response => setCampaigns(response.data))
+            .catch(error => console.error('Error fetching campaigns:', error));
+    }, []);
+
+    // Handle form submission
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('http://localhost:8000/api/campaigns', formData);
+            setCampaigns([...campaigns, response.data]);
+            setFormData({ name: '', description: '', audience: '' });
+        } catch (error) {
+            console.error('Error creating campaign:', error);
+        }
+    };
+
     return (
-      <div className=" p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full">
+        <div className="p-6">
+            <h1 className="text-2xl font-bold mb-4">Campaigns</h1>
 
-      </div>
+            <form onSubmit={handleSubmit} className="mb-6">
+                <div className="mb-4">
+                    <label htmlFor="name" className="block mb-2 font-medium">Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="border p-2 w-full"
+                        required
+                    />
+                </div>
+                <div className="mb-4">
+                    <label htmlFor="description" className="block mb-2 font-medium">Description</label>
+                    <textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        className="border p-2 w-full"
+                        required
+                    ></textarea>
+                </div>
+                <div className="mb-4">
+                    <label htmlFor="audience" className="block mb-2 font-medium">Audience</label>
+                    <input
+                        type="text"
+                        id="audience"
+                        value={formData.audience}
+                        onChange={(e) => setFormData({ ...formData, audience: e.target.value })}
+                        className="border p-2 w-full"
+                        required
+                    />
+                </div>
+                <button type="submit" className="bg-blue-500 text-white px-4 py-2">Create Campaign</button>
+            </form>
+
+            <h2 className="text-xl font-bold mb-4">Existing Campaigns</h2>
+            <ul>
+                {/* {campaigns.map(campaign => (
+                    <li key={campaign.id} className="mb-2">
+                        <strong>{campaign.name}</strong>: {campaign.description} (Audience: {campaign.audience})
+                    </li>
+                ))} */}
+            </ul>
+        </div>
     );
-  }
-  return (
-    <div className="flex flex-1 h-screen">
-      <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full">
-        <div className="flex items-center justify-center">
-          {userData && (
-            <div className="flex items-center space-x-4 sm:py-10 sm:px-10 p-6 mb-6 border rounded-3xl border-neutral-200 dark:border-neutral-700 ">
-              <div className="flex-shrink-0">
-                <Image
-                  className="sm:h-36 sm:w-36 h-24 w-24 object-cover rounded-full dark:border-2 border-primary"
-                  src={`${userData.profilePicture}?s=600`}
-                  alt={userData?.username || "User Profile"}
-                  width={144} // Width and height are set to 144px (36 * 4) to match h-36 w-36
-                  height={144}
-                />
-              </div>
-              <div className="flex flex-col">
-                <p className="text-xl font-semibold text-primary">
-                  {userData.username}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Email : {userData.email}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Country : {userData.country}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Joined :{" "}
-                  {new Date(userData.createdAt).toISOString().split("T")[0]}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <div
-            className={`h-20 w-full rounded-lg flex items-center justify-center
-    ${userData.role.includes("Admin")
-                ? "bg-gradient-to-r from-orange-400 via-orange-600 to-orange-700"
-                : userData.role.includes("Moderator")
-                  ? "bg-gradient-to-r from-yellow-400 via-yellow-600 to-yellow-700"
-                  : userData.role.includes("Manager")
-                    ? "bg-gradient-to-r from-green-400 via-green-600 to-green-700"
-                    : userData.role.includes("Affiliate")
-                      ? "bg-gradient-to-r from-purple-400 via-purple-600 to-purple-700"
-                      : "bg-gradient-to-r from-blue-400 via-blue-600 to-blue-700"
-              }`}
-          >
-            {userData.role.includes("Admin") ? (
-              <p className="text-white text-sm sm:text-base md:text-lg text-center">
-                You&apos;re an admin
-              </p>
-            ) : userData.role.includes("Manager") ? (
-
-              <p className="text-white text-sm sm:text-base md:text-lg text-center">
-                You&apos;re a manager
-              </p>
-            ) : userData.role.includes("Moderator") ? (
-              <p className="text-white text-sm sm:text-base md:text-lg text-center">
-                You&apos;re a moderator
-              </p>
-            ) : userData.role.includes("Affiliate") ? (
-              <p className="text-white text-sm sm:text-base md:text-lg text-center">
-                You&apos;re an affiliate
-              </p>
-            ) : (
-              <p className="text-white text-sm sm:text-base md:text-lg text-center text-balance p-2">
-                Apply for Manager/Affiliate
-              </p>
-            )}
-          </div>
-
-          {[...new Array(2)].map((_, idx) => (
-            <div
-              key={"first-array-" + idx} // Using idx to ensure unique key
-              className="h-20 w-full rounded-lg  bg-gray-100 dark:bg-neutral-800 animate-pulse"
-            ></div>
-          ))}
-        </div>
-        <div className="flex gap-2 flex-1">
-          {[...new Array(2)].map((_, idx) => (
-            <div
-              key={"second-array-" + idx} // Using idx here as well
-              className="h-full w-full rounded-lg  bg-gray-100 dark:bg-neutral-800 animate-pulse"
-            ></div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 };
 
-export default Dashboard;
+export default CampaignsPage;
