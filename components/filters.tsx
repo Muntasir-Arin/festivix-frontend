@@ -49,7 +49,7 @@ export function Filters({ onDateChange, onPriceChange, onSearch }: FiltersProps)
       <div className="flex flex-wrap gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="bg-green-50">
+            <Button variant="outline" className="">
               <MapPin className="mr-2 h-4 w-4" />
               Barcelona
             </Button>

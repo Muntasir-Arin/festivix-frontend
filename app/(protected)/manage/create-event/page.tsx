@@ -75,7 +75,7 @@ const eventFormSchema = z.object({
   themeColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, "Invalid color format"),
   dynamicPricingEnabled: z.boolean(),
   dynamicPriceAdjustment: z.number().min(0).max(100).optional(),
-  venueLayout: z.enum(['Indoor', 'Outdoor', 'Hybrid', 'Virtual']),
+  venueLayout: z.enum(['Stadium']),
   location: z.string().min(2, "Location must be at least 2 characters"),
   refundPercentage: z.number().min(50).max(100),
 });
@@ -159,9 +159,9 @@ function EventForm() {
           },
         }
       );
-  
+      console.log("Event created:", response.data);
       toast.success("Event created successfully!");
-      // router.push("/events");
+    router.push(`/events/${response.data.id}`);
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event. Please try again.");
@@ -548,10 +548,7 @@ function EventForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Indoor">Indoor</SelectItem>
-                      <SelectItem value="Outdoor">Outdoor</SelectItem>
-                      <SelectItem value="Hybrid">Hybrid</SelectItem>
-                      <SelectItem value="Virtual">Virtual</SelectItem>
+                      <SelectItem value="Stadium">Stadium</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

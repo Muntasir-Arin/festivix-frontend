@@ -49,6 +49,7 @@ export default function ApplicationsPage() {
           }
         }
       )
+      console.log(response.data.applications)
       setApplications(response.data.applications)
       setLoading(false)
     } catch (error) {
@@ -135,10 +136,11 @@ export default function ApplicationsPage() {
       <h1 className="text-3xl font-bold mb-6">Applications</h1>
       <div className="space-y-6">
         {applications.map((application) => (
+          console.log(application),
           <Card key={application._id} className="shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
-              <CardTitle className="text-xl">{application.user.username}</CardTitle>
-              <CardDescription>{application.user.email}</CardDescription>
+              <CardTitle className="text-xl">{application.user?.username}</CardTitle>
+              <CardDescription>{application.user?.email}</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="mb-4 text-gray-700">{application.applicationReason}</p>
@@ -150,7 +152,7 @@ export default function ApplicationsPage() {
               </div>
               {application.checkedBy && (
                 <p className="text-sm text-muted-foreground mt-2">
-                  Checked by {application.checkedBy.username} {formatDistanceToNow(new Date(application.checkDate!), { addSuffix: true })}
+                  Checked by {application.checkedBy?.username} {formatDistanceToNow(new Date(application.checkDate!), { addSuffix: true })}
                 </p>
               )}
             </CardContent>

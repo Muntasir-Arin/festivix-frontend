@@ -54,6 +54,7 @@ const zones = [
 ]
 
 const StadiumCanvas = ({ onZoneSelect, prices, ticketsRemaining }) => {
+  console.log(prices, ticketsRemaining)
   const canvasRef = useRef(null)
   const containerRef = useRef(null)
   const [selectedZone, setSelectedZone] = useState(null)

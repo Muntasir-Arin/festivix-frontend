@@ -29,7 +29,7 @@ export function EventCard({
           fill
           className="object-cover transition-transform group-hover:scale-105"
         />
-        <div className="absolute top-2 right-2 bg-white rounded-md px-2 py-1 text-sm font-medium">
+        <div className="absolute top-2 right-2  rounded-md px-2 py-1 text-sm font-medium">
           From ${startingPrice}
         </div>
       </div>
